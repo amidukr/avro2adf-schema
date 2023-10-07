@@ -1,0 +1,18 @@
+{
+  "type" : "record",
+  "namespace" : "Tutorialspoint",
+  "name" : "Employee",
+  "fields" : [
+    { "name" : "Name" , "type" : "string" },
+    { "name" : "Age" , "type" : "int" },
+    { "name": "someprop",
+      "type": ["null", {
+        "type" : "record",
+        "fields": [
+          { "name" : "prop1" , "type" : "string" },
+          { "name" : "prop2" , "type" : "string" }
+        ]
+      }]
+    }
+  ]
+}

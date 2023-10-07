@@ -33,37 +33,58 @@ impl ValueExt for Value {
     }
 }
 
-fn handle_type(ident: usize, json: &Value) {
+fn handle_any_json_element(ident: usize, json: &Value) {
     match json {
         Value::Null => {}
-        Value::String(o) => handle_string_type(o),
-        Value::Array(o) => handle_array_type(ident, o),
-        Value::Object(o) => handle_map_type(ident, o),
+        Value::String(o) => handle_json_string_type(o),
+        Value::Array(o) => handle_json_array_type(ident, o),
+        Value::Object(o) => handle_json_map_element(ident, o),
         _ => panic!("Unexpected avro type tag: {}", json),
     }
 }
 
-fn handle_map_type(ident: usize, object: &Map<String, Value>) {
+fn handle_json_map_element(ident: usize, object: &Map<String, Value>) {
 
     if let Some(Value::String(t)) = object.get("type") {
         match t.as_str() {
-            "record" => {handle_record_type(ident, object); return;},
+            "record" => { handle_avro_record_type(ident, object); return;},
+            "array" => {handle_avro_array_type(ident, object); return;}
             _ => {}
         }
     }
 
-    panic!("Unexpected type definition = {:?}", object);
+    panic!("Unexpected json map element definition = {:?}", object);
 }
 
-fn handle_record_type(ident: usize, object: &Map<String, Value>) {
+fn handle_json_array_type(ident: usize, array: &Vec<Value>) {
+    let type_array:Vec<_> = array.iter()
+        .filter(|t| match t {
+            Value::String(s) if s == "null" => false,
+            _ => true
+        }
+        ).collect();
+
+    if type_array.len() != 1 {
+        panic!("Array of types has different to 1 of non-nullable types, {:?}", array);
+    }
+
+    handle_any_json_element(ident, type_array.into_iter().next()
+        .unwrap())
+}
+
+fn handle_json_string_type(t: &String)  {
+    print!("{}", t)
+}
+
+fn handle_avro_record_type(ident: usize, object: &Map<String, Value>) {
     let fields = object.get("fields")
         .expect(format!("`record` type expect to have 'fields' attribute, json = {:?}", object).as_str());
 
     let field_list = fields.as_array()
         .expect(format!("`fields` attribute expected to be of json array type, fields = {}", fields).as_str());
 
-    
-    println!("{: <1$}(", "", ident);
+
+    println!("(");
 
     for (pos, e) in field_list.iter().enumerate() {
 
@@ -80,7 +101,7 @@ fn handle_record_type(ident: usize, object: &Map<String, Value>) {
 
         print!("{: <1$}{name} as ", "", ident + 4);
 
-        handle_type(ident + 4, _type);
+        handle_any_json_element(ident + 4, _type);
 
         if pos != field_list.len() - 1 {
             println!(",")
@@ -89,33 +110,22 @@ fn handle_record_type(ident: usize, object: &Map<String, Value>) {
         }
     }
 
-    println!("{: <1$})", "", ident);
+    print!("{: <1$})", "", ident);
 }
 
-fn handle_array_type(ident: usize, array: &Vec<Value>) {
-    let type_array:Vec<_> = array.iter()
-        .filter(|t| match t {
-            Value::String(s) if s != "null" => true,
-            _ => true
-        }
-        ).collect();
+fn handle_avro_array_type(ident: usize, object: &Map<String, Value>) {
+    let items = object.get("items")
+        .expect(format!("`array` type expect to have 'items' attribute, json = {:?}", object).as_str());
 
-    if type_array.len() != 1 {
-        panic!("Array of types has different to 1 of non-nullable types, {:?}", array);
-    }
-
-    handle_type(ident, type_array.into_iter().next()
-        .unwrap())
+    handle_any_json_element(ident,items);
+    print!("[]")
 }
 
-fn handle_string_type(t: &String)  {
-    print!("{}", t)
-}
 
 fn convert_avro_2_adf_schema(avro: &str)  {
     let root: Value = serde_json::from_str(avro).unwrap();
 
-    handle_type(0, &root)
+    handle_any_json_element(0, &root)
 }
 
 fn main() -> io::Result<()>{

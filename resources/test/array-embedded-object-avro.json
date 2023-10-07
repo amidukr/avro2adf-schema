@@ -1,0 +1,22 @@
+{
+  "type" : "record",
+  "namespace" : "Tutorialspoint",
+  "name" : "Employee",
+  "fields" : [
+    { "name" : "Name" , "type" : "string" },
+    { "name" : "Age" , "type" : "int" },
+    { "name": "somearray",
+      "type": {
+        "type" : "array",
+        "items": {
+          "type": "record",
+          "fields" : [
+            { "name" : "p1" , "type" : "string" },
+            { "name" : "p2" , "type" : ["string"] },
+            { "name" : "p3" , "type" : ["null", "string"] }
+          ]
+        }
+      }
+    }
+  ]
+}

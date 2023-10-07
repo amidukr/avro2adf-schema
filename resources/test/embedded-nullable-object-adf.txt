@@ -1,0 +1,8 @@
+(
+    Name as string,
+    Age as int,
+    someprop as (
+        prop1 as string,
+        prop2 as string
+    )
+)
