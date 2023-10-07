@@ -1,0 +1,28 @@
+{
+  "type": "record",
+  "namespace": "com.example",
+  "name": "User",
+  "fields": [
+    {
+      "name": "first_name",
+      "type": "string",
+      "doc": "First Name of the User"
+    },
+    {
+      "name": "last_name",
+      "type": "string",
+      "doc": "Last Name of the User"
+    },
+    {
+      "name": "age",
+      "type": "int",
+      "doc": "Age of the User"
+    },
+    {
+      "name": "automated_email",
+      "type": "boolean",
+      "default": true,
+      "doc": "Indicaton if the user is subscribe to the newsletter"
+    }
+  ]
+}
