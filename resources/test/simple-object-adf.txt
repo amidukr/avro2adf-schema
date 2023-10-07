@@ -1,0 +1,4 @@
+(
+    Name as string,
+    Age as int
+)
