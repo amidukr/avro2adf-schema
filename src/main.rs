@@ -1,8 +1,20 @@
 extern crate core;
 
+use std::collections::HashMap;
 use std::io;
+use once_cell::sync::Lazy;
+
 use serde_json::value::Value;
 use serde_json::Map;
+
+static AVRO_2_ADF_TYPES: Lazy<HashMap<&str, &str>> = Lazy::new(|| HashMap::from([
+    ("string", "string"),
+    ("int", "integer"),
+    ("long", "long"),
+    ("boolean", "boolean"),
+    ("decimal", "decimal"),
+    ("double", "double")
+]));
 
 trait ValueExt {
     fn as_array(&self) -> Option<&Vec<Value>>;
@@ -12,24 +24,24 @@ trait ValueExt {
 
 impl ValueExt for Value {
     fn as_array(&self) -> Option<&Vec<Value>> {
-        return  match self {
+        return match self {
             Value::Array(o) => Some(o),
             _ => None
-        }
+        };
     }
 
     fn as_object_value(&self) -> Option<&Map<String, Value>> {
-        return  match self {
+        return match self {
             Value::Object(o) => Some(o),
             _ => None
-        }
+        };
     }
 
     fn as_string(&self) -> Option<&String> {
-        return  match self {
+        return match self {
             Value::String(o) => Some(o),
             _ => None
-        }
+        };
     }
 }
 
@@ -44,11 +56,16 @@ fn handle_any_json_element(ident: usize, json: &Value) {
 }
 
 fn handle_json_map_element(ident: usize, object: &Map<String, Value>) {
-
     if let Some(Value::String(t)) = object.get("type") {
         match t.as_str() {
-            "record" => { handle_avro_record_type(ident, object); return;},
-            "array" => {handle_avro_array_type(ident, object); return;}
+            "record" => {
+                handle_avro_record_type(ident, object);
+                return;
+            }
+            "array" => {
+                handle_avro_array_type(ident, object);
+                return;
+            }
             _ => {}
         }
     }
@@ -57,7 +74,7 @@ fn handle_json_map_element(ident: usize, object: &Map<String, Value>) {
 }
 
 fn handle_json_array_type(ident: usize, array: &Vec<Value>) {
-    let type_array:Vec<_> = array.iter()
+    let type_array: Vec<_> = array.iter()
         .filter(|t| match t {
             Value::String(s) if s == "null" => false,
             _ => true
@@ -72,8 +89,11 @@ fn handle_json_array_type(ident: usize, array: &Vec<Value>) {
         .unwrap())
 }
 
-fn handle_json_string_type(t: &String)  {
-    print!("{}", t)
+fn handle_json_string_type(t: &String) {
+    let adf_type = AVRO_2_ADF_TYPES.get(t.as_str())
+        .expect(format!("Unexpected avro type: {}", t).as_str());
+
+    print!("{}", adf_type)
 }
 
 fn handle_avro_record_type(ident: usize, object: &Map<String, Value>) {
@@ -87,7 +107,6 @@ fn handle_avro_record_type(ident: usize, object: &Map<String, Value>) {
     println!("(");
 
     for (pos, e) in field_list.iter().enumerate() {
-
         let field = e.as_object_value()
             .expect(format!("Elements of `fields` attributes are expected to be of json object type, fields element = {}", e).as_str());
 
@@ -105,7 +124,7 @@ fn handle_avro_record_type(ident: usize, object: &Map<String, Value>) {
 
         if pos != field_list.len() - 1 {
             println!(",")
-        }else{
+        } else {
             println!()
         }
     }
@@ -117,18 +136,18 @@ fn handle_avro_array_type(ident: usize, object: &Map<String, Value>) {
     let items = object.get("items")
         .expect(format!("`array` type expect to have 'items' attribute, json = {:?}", object).as_str());
 
-    handle_any_json_element(ident,items);
+    handle_any_json_element(ident, items);
     print!("[]")
 }
 
 
-fn convert_avro_2_adf_schema(avro: &str)  {
+fn convert_avro_2_adf_schema(avro: &str) {
     let root: Value = serde_json::from_str(avro).unwrap();
 
     handle_any_json_element(0, &root)
 }
 
-fn main() -> io::Result<()>{
+fn main() -> io::Result<()> {
     let json_input = io::read_to_string(io::stdin())?;
 
     convert_avro_2_adf_schema(json_input.as_str());

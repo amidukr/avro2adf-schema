@@ -1,0 +1,8 @@
+(
+    stringType as string,
+    intType as integer,
+    longType as long,
+    booleanType as boolean,
+    decimalType as decimal,
+    doubleType as double
+)

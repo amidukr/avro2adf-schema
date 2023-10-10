@@ -1,0 +1,13 @@
+{
+  "type" : "record",
+  "namespace" : "Tutorialspoint",
+  "name" : "Employee",
+  "fields" : [
+    { "name" : "stringType" , "type" : "string" },
+    { "name" : "intType" , "type" : "int" },
+    { "name" : "longType" , "type" : "long" },
+    { "name" : "booleanType" , "type" : "boolean" },
+    { "name" : "decimalType" , "type" : "decimal" },
+    { "name" : "doubleType" , "type" : "double" }
+  ]
+}

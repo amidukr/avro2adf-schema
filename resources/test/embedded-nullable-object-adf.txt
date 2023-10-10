@@ -1,6 +1,6 @@
 (
     Name as string,
-    Age as int,
+    Age as integer,
     someprop as (
         prop1 as string,
         prop2 as string

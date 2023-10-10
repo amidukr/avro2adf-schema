@@ -1,6 +1,6 @@
 (
     Name as string,
-    Age as int,
+    Age as integer,
     somearray as (
         p1 as string,
         p2 as string,

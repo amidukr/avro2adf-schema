@@ -1,4 +1,4 @@
 (
     Name as string,
-    Age as int
+    Age as integer
 )
