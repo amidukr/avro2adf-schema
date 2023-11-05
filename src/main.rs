@@ -167,7 +167,7 @@ fn handle_decimal_avro_type(object: &Map<String, Value>) {
         .as_i64()
         .expect(format!("`scale` expected to be of numeric type, json = {:?}", object).as_str());
 
-    print!("decimal({}, {})", precision, scale)
+    print!("decimal({},{})", precision, scale)
 }
 
 
