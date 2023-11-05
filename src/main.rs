@@ -16,35 +16,6 @@ static AVRO_2_ADF_TYPES: Lazy<HashMap<&str, &str>> = Lazy::new(|| HashMap::from(
     ("string", "string")
 ]));
 
-trait ValueExt {
-    fn as_array(&self) -> Option<&Vec<Value>>;
-    fn as_object_value(&self) -> Option<&Map<String, Value>>;
-    fn as_string(&self) -> Option<&String>;
-}
-
-impl ValueExt for Value {
-    fn as_array(&self) -> Option<&Vec<Value>> {
-        return match self {
-            Value::Array(o) => Some(o),
-            _ => None
-        };
-    }
-
-    fn as_object_value(&self) -> Option<&Map<String, Value>> {
-        return match self {
-            Value::Object(o) => Some(o),
-            _ => None
-        };
-    }
-
-    fn as_string(&self) -> Option<&String> {
-        return match self {
-            Value::String(o) => Some(o),
-            _ => None
-        };
-    }
-}
-
 fn handle_any_json_element(ident: usize, json: &Value) {
     match json {
         Value::Null => {}
@@ -111,7 +82,7 @@ fn handle_avro_record_type(ident: usize, object: &Map<String, Value>) {
     println!("(");
 
     for (pos, e) in field_list.iter().enumerate() {
-        let field = e.as_object_value()
+        let field = e.as_object()
             .expect(format!("Elements of `fields` attributes are expected to be of json object type, fields element = {}", e).as_str());
 
         let name = field.get("name")
