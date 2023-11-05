@@ -7,7 +7,7 @@
     { "name" : "intType" , "type" : "int" },
     { "name" : "longType" , "type" : "long" },
     { "name" : "booleanType" , "type" : "boolean" },
-    { "name" : "decimalType" , "type" : "decimal" },
+    { "name" : "floatType" , "type" : "float" },
     { "name" : "doubleType" , "type" : "double" }
   ]
 }

@@ -8,12 +8,12 @@ use serde_json::value::Value;
 use serde_json::Map;
 
 static AVRO_2_ADF_TYPES: Lazy<HashMap<&str, &str>> = Lazy::new(|| HashMap::from([
-    ("string", "string"),
+    ("boolean", "boolean"),
     ("int", "integer"),
     ("long", "long"),
-    ("boolean", "boolean"),
-    ("decimal", "decimal"),
-    ("double", "double")
+    ("float", "float"),
+    ("double", "double"),
+    ("string", "string")
 ]));
 
 trait ValueExt {
@@ -64,6 +64,10 @@ fn handle_json_map_element(ident: usize, object: &Map<String, Value>) {
             }
             "array" => {
                 handle_avro_array_type(ident, object);
+                return;
+            }
+            "bytes" => {
+                handle_avro_bytes_type(object);
                 return;
             }
             _ => {}
@@ -138,6 +142,32 @@ fn handle_avro_array_type(ident: usize, object: &Map<String, Value>) {
 
     handle_any_json_element(ident, items);
     print!("[]")
+}
+
+fn handle_avro_bytes_type(object: &Map<String, Value>) {
+    let logical_type = object.get("logicalType")
+        .expect(format!("`bytes` type expected to have 'logicalType' attribute, json = {:?}", object).as_str())
+        .as_str()
+        .expect(format!("`logicalType` field element expected to be of json string type, json = {:?}", object).as_str());
+
+    match logical_type {
+        "decimal" => handle_decimal_avro_type(object),
+        _ => panic!("Unsupported `logicalType` {} for avro type `bytes`, json = {:?}", logical_type, object),
+    }
+}
+
+fn handle_decimal_avro_type(object: &Map<String, Value>) {
+    let precision = object.get("precision")
+        .expect(format!("`decimal` logicalType expected to have 'precision' attribute, json = {:?}", object).as_str())
+        .as_i64()
+        .expect(format!("`precision` expected to be of numeric type, json = {:?}", object).as_str());
+
+    let scale = object.get("scale")
+        .expect(format!("`decimal` logicalType expected to have 'scale' attribute, json = {:?}", object).as_str())
+        .as_i64()
+        .expect(format!("`scale` expected to be of numeric type, json = {:?}", object).as_str());
+
+    print!("decimal({}, {})", precision, scale)
 }
 
 

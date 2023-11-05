@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "namespace": "Tutorialspoint",
+  "name": "Employee",
+  "fields": [
+    {
+      "name": "logicalDecimal",
+      "type": {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 18,
+        "scale": 2
+      }
+    }
+  ]
+}

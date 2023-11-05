@@ -3,6 +3,6 @@
     intType as integer,
     longType as long,
     booleanType as boolean,
-    decimalType as decimal,
+    floatType as float,
     doubleType as double
 )

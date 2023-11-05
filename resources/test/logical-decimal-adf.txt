@@ -1,0 +1,3 @@
+(
+    logicalDecimal as decimal(18, 2)
+)
